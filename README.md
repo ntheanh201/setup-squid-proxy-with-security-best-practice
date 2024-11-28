@@ -3,7 +3,15 @@
 
 - Security best practices when a squid proxy is being used as a "forward proxy"
 - If you are configuring as a reverse proxy, some topics in this guide may not be applicable. We recommend cross-referencing other security guides for appropriate security hardening criteria when using Reverse Proxy.
-- Last Modified: May 31, 2024
+- To enable debug Squid service, add the '-d 1' option to the squid ExecStart line in the squid.service file.
+
+  ```bash
+  [root@localhost ~]# vim /usr/lib/systemd/system/squid.service
+  ...
+  ExecStart=/usr/sbin/squid -f /etc/squid/squid.conf -d 1  # <== Add
+  ```
+
+- Last Modified: Nov 28, 2024
 ```
 # cat /etc/redhat-release
 Rocky Linux release 8.8 (Green Obsidian)
@@ -72,6 +80,25 @@ Group=squid  # <== Change to 'squid'
 squid:x:23:23::/var/spool/squid:/sbin/nologin
 ```
 
+- If you can't restart the squid service and the problem is related to the PID file permission, make a change to PIDFile in the squid.service file and pid_filename in the squid.conf file.
+
+```bash
+[root@localhost ~]# chown -R squid:squid /run/squid
+```
+
+```bash
+[root@localhost ~]# vim /etc/squid/squid.conf
+...
+pid_filename /run/squid/squid.pid  # <== Change to '/run/squid/squid.pid'
+...
+```
+
+```bash
+[root@localhost ~]# vim /usr/lib/systemd/system/squid.service
+...
+PIDFile=/run/squid/squid.pid  # <== Change to '/run/squid/squid.pid'
+...
+```
 
 ## 2. Ensure access to SQUID directories and files is restricted
 Directories and configuration files related to Squid should only be accessible by the 'squid' or 'root' user. Verify and adjust permissions if other users have access to these directories and files.
